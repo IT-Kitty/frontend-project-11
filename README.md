@@ -4,4 +4,4 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=IT-Kitty_frontend-project-11&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=IT-Kitty_frontend-project-11)
 
 ### Demo
-https://frontend-project-11-l36pi2jh8-katerinakvtnskh-9346s-projects.vercel.app/
+https://frontend-project-11-liard-psi.vercel.app/
