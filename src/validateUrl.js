@@ -3,11 +3,11 @@ import * as yup from 'yup';
 const createSchema = (existingUrls) => yup
   .string()
   .trim()
-  .required('Не должно быть пустым')
-  .url('Ссылка должна быть валидным URL')
+  .required()
+  .url()
   .test(
     'not-duplicate',
-    'RSS уже существует',
+    'errors.duplicate',
     (value) => Promise.resolve(!existingUrls.includes(value)),
   );
 

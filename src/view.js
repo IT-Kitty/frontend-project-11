@@ -1,5 +1,7 @@
 import { subscribe } from 'valtio/vanilla';
 
+const translate = (i18n, key) => (key ? i18n.t(key) : '');
+
 const renderInput = (state, input) => {
   if (state.form.status === 'invalid') {
     input.classList.add('is-invalid');
@@ -9,18 +11,18 @@ const renderInput = (state, input) => {
   input.classList.remove('is-invalid');
 };
 
-const renderFeedback = (state, feedback) => {
+const renderFeedback = (state, feedback, i18n) => {
   feedback.className = 'feedback mt-2 mb-0';
 
   if (state.form.status === 'invalid') {
     feedback.classList.add('text-danger');
-    feedback.textContent = state.form.error;
+    feedback.textContent = translate(i18n, state.form.error);
     return;
   }
 
   if (state.form.status === 'valid') {
     feedback.classList.add('text-success');
-    feedback.textContent = 'RSS успешно загружен';
+    feedback.textContent = i18n.t('feedback.success');
     return;
   }
 
@@ -33,7 +35,7 @@ const renderSubmitButton = (state, button) => {
 
 const render = (state, elements) => {
   renderInput(state, elements.input);
-  renderFeedback(state, elements.feedback);
+  renderFeedback(state, elements.feedback, elements.i18n);
   renderSubmitButton(state, elements.submitButton);
 };
 
