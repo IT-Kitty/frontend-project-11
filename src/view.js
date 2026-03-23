@@ -60,7 +60,7 @@ const renderPosts = (state, postsNode, postsContainer, i18n) => {
 
   postsContainer.classList.remove('d-none')
   postsNode.innerHTML = state.posts
-    .map((post) => {
+    .map(post => {
       const isRead = state.ui.readPostIds.includes(post.id)
       const linkClass = isRead ? 'fw-normal link-secondary' : 'fw-bold'
 
@@ -85,7 +85,7 @@ const renderPosts = (state, postsNode, postsContainer, i18n) => {
 }
 
 const renderModal = (state, elements) => {
-  const currentPost = state.posts.find((post) => post.id === state.ui.modalPostId)
+  const currentPost = state.posts.find(post => post.id === state.ui.modalPostId)
 
   if (!currentPost) {
     elements.modalTitle.textContent = ''
