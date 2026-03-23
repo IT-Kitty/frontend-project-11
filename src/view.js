@@ -33,10 +33,47 @@ const renderSubmitButton = (state, button) => {
   button.disabled = state.form.status === 'sending';
 };
 
+const renderFeeds = (state, feedsNode, feedsContainer) => {
+  if (state.feeds.length === 0) {
+    feedsContainer.classList.add('d-none');
+    feedsNode.innerHTML = '';
+    return;
+  }
+
+  feedsContainer.classList.remove('d-none');
+  feedsNode.innerHTML = state.feeds
+    .map((feed) => `
+      <li class="list-group-item border-0 px-0">
+        <h3 class="h5 mb-1">${feed.title}</h3>
+        <p class="mb-0 text-muted">${feed.description}</p>
+      </li>
+    `)
+    .join('');
+};
+
+const renderPosts = (state, postsNode, postsContainer) => {
+  if (state.posts.length === 0) {
+    postsContainer.classList.add('d-none');
+    postsNode.innerHTML = '';
+    return;
+  }
+
+  postsContainer.classList.remove('d-none');
+  postsNode.innerHTML = state.posts
+    .map((post) => `
+      <li class="list-group-item border-0 px-0">
+        <a href="${post.link}" target="_blank" rel="noopener noreferrer">${post.title}</a>
+      </li>
+    `)
+    .join('');
+};
+
 const render = (state, elements) => {
   renderInput(state, elements.input);
   renderFeedback(state, elements.feedback, elements.i18n);
   renderSubmitButton(state, elements.submitButton);
+  renderFeeds(state, elements.feeds, elements.feedsContainer);
+  renderPosts(state, elements.posts, elements.postsContainer);
 };
 
 const initView = (state, elements) => {

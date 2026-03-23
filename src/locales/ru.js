@@ -8,6 +8,8 @@ export default {
       rssPlaceholder: 'Ссылка RSS',
       rssExample: 'Пример: https://lorem-rss.hexlet.app/feed',
       submitButton: 'Добавить',
+      feedsHeader: 'Фиды',
+      postsHeader: 'Посты',
     },
     feedback: {
       success: 'RSS успешно загружен',
@@ -16,6 +18,8 @@ export default {
       required: 'Не должно быть пустым',
       invalidUrl: 'Ссылка должна быть валидным URL',
       duplicate: 'RSS уже существует',
+      network: 'Ошибка сети',
+      invalidRss: 'Ресурс не содержит валидный RSS',
     },
   },
 };

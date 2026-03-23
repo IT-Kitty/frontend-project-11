@@ -3,6 +3,11 @@ import { proxy } from 'valtio/vanilla';
 import initView from './view.js';
 import validateUrl from './validateUrl.js';
 import initI18n from './i18n.js';
+import fetchRss from './api.js';
+import parseRss from './parser.js';
+
+let idCounter = 1;
+const getNextId = () => idCounter++;
 
 const render = (i18n) => {
   const app = document.querySelector('#app');
@@ -42,52 +47,109 @@ const render = (i18n) => {
           </div>
         </div>
       </header>
-      <main class="flex-grow-1"></main>
+      <main class="flex-grow-1 py-5">
+        <div class="container">
+          <div class="row g-4">
+            <div class="col-12 col-lg-6" data-posts-container>
+              <div class="card border-0">
+                <div class="card-body">
+                  <h2 class="h3 mb-0">${t('ui.postsHeader')}</h2>
+                  <ul class="list-group list-group-flush mt-4" data-posts></ul>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-lg-6" data-feeds-container>
+              <div class="card border-0">
+                <div class="card-body">
+                  <h2 class="h3 mb-0">${t('ui.feedsHeader')}</h2>
+                  <ul class="list-group list-group-flush mt-4" data-feeds></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   `;
 };
 
 const state = proxy({
   feeds: [],
+  posts: [],
   form: {
     status: 'idle',
     error: null,
   },
 });
 
+const loadRssData = (url) => fetchRss(url).then((xml) => parseRss(xml));
+
+const addFeedToState = (stateData, url, parsedFeed) => {
+  const feedId = getNextId();
+  const feed = {
+    id: feedId,
+    url,
+    title: parsedFeed.feed.title,
+    description: parsedFeed.feed.description,
+  };
+
+  const posts = parsedFeed.posts.map((post) => ({
+    id: getNextId(),
+    feedId,
+    title: post.title,
+    description: post.description,
+    link: post.link,
+  }));
+
+  stateData.feeds.unshift(feed);
+  stateData.posts.unshift(...posts);
+};
+
 const setupForm = (i18n) => {
   const form = document.querySelector('[data-rss-form]');
   const input = form.querySelector('input[name="url"]');
   const feedback = document.querySelector('[data-feedback]');
   const submitButton = form.querySelector('button[type="submit"]');
+  const posts = document.querySelector('[data-posts]');
+  const feeds = document.querySelector('[data-feeds]');
+  const postsContainer = document.querySelector('[data-posts-container]');
+  const feedsContainer = document.querySelector('[data-feeds-container]');
 
   initView(state, {
     i18n,
     input,
     feedback,
     submitButton,
+    posts,
+    feeds,
+    postsContainer,
+    feedsContainer,
   });
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
 
     const formData = new FormData(form);
-    const url = formData.get('url');
-    const existingUrls = state.feeds.slice();
+    const url = formData.get('url')?.toString().trim() ?? '';
+    const existingUrls = state.feeds.map((feed) => feed.url);
 
     state.form.status = 'sending';
     state.form.error = null;
 
     validateUrl(url, existingUrls)
-      .then((validatedUrl) => {
-        state.feeds.push(validatedUrl);
+      .then((validatedUrl) => loadRssData(validatedUrl).then((parsedData) => ({
+        validatedUrl,
+        parsedData,
+      })))
+      .then(({ validatedUrl, parsedData }) => {
+        addFeedToState(state, validatedUrl, parsedData);
         state.form.status = 'valid';
         form.reset();
         input.focus();
       })
       .catch((error) => {
         state.form.status = 'invalid';
-        state.form.error = error.message;
+        state.form.error = error.message ?? 'errors.network';
       });
   });
 };
