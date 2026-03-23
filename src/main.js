@@ -70,7 +70,7 @@ const render = (i18n) => {
       <main class="flex-grow-1 py-5">
         <div class="container">
           <div class="row g-4">
-            <div class="col-12 col-lg-6" data-posts-container>
+            <div class="col-12 col-lg-6 posts" data-posts-container>
               <div class="card border-0">
                 <div class="card-body">
                   <h2 class="h3 mb-0">${t('ui.postsHeader')}</h2>
@@ -78,7 +78,7 @@ const render = (i18n) => {
                 </div>
               </div>
             </div>
-            <div class="col-12 col-lg-6" data-feeds-container>
+            <div class="col-12 col-lg-6 feeds" data-feeds-container>
               <div class="card border-0">
                 <div class="card-body">
                   <h2 class="h3 mb-0">${t('ui.feedsHeader')}</h2>
