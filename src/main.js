@@ -1,4 +1,7 @@
 import './style.css';
+import { proxy } from 'valtio/vanilla';
+import initView from './view.js';
+import validateUrl from './validateUrl.js';
 
 const render = () => {
   const app = document.querySelector('#app');
@@ -10,20 +13,22 @@ const render = () => {
           <div class="row">
             <div class="col-12 col-lg-10">
               <h1 class="display-3 lh-1 mb-3">RSS агрегатор</h1>
-              <p class="lead mb-4 text-white-50">Начните читать RSS сегодня Это легко, это красиво</p>
+              <p class="lead mb-4 text-white">Начните читать RSS сегодня! Это легко, это красиво.</p>
               <form class="rss-form" data-rss-form>
                 <div class="row g-3 align-items-start">
                   <div class="col-12 col-lg-9">
+                    <label for="rss-url" class="visually-hidden">Ссылка RSS</label>
                     <input
                       id="rss-url"
                       name="url"
                       type="text"
-                      class="form-control form-control-lg"
+                      class="form-control py-3"
                       placeholder="Ссылка RSS"
                       aria-label="RSS URL"
+                      autocomplete="off"
                       required
                     >
-                    <div class="form-text text-white-50 mt-2">Пример https://lorem-rss.hexlet.app/feed</div>
+                    <div class="form-text text-white-50 mt-2">Пример: https://lorem-rss.hexlet.app/feed</div>
                   </div>
                   <div class="col-12 col-lg-3 d-grid">
                     <button type="submit" class="btn btn-lg btn-primary">Добавить</button>
@@ -36,37 +41,50 @@ const render = () => {
         </div>
       </header>
       <main class="flex-grow-1"></main>
-      <footer class="border-top py-3 text-center text-muted bg-body-secondary">
-        created by <a href="https://hexlet.io" target="_blank" rel="noreferrer">Hexlet</a>
-      </footer>
     </div>
   `;
 };
+
+const state = proxy({
+  feeds: [],
+  form: {
+    status: 'idle',
+    error: '',
+  },
+});
 
 const setupForm = () => {
   const form = document.querySelector('[data-rss-form]');
   const input = form.querySelector('input[name="url"]');
   const feedback = document.querySelector('[data-feedback]');
+  const submitButton = form.querySelector('button[type="submit"]');
+
+  initView(state, {
+    input,
+    feedback,
+    submitButton,
+  });
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
 
-    const url = input.value.trim();
+    const formData = new FormData(form);
+    const url = formData.get('url');
+    const existingUrls = state.feeds.slice();
 
-    Promise.resolve(url)
-      .then((value) => {
-        if (value.length === 0) {
-          throw new Error('Введите URL RSS-потока');
-        }
+    state.form.status = 'sending';
+    state.form.error = '';
 
-        feedback.className = 'feedback mt-3 mb-0 text-success-emphasis';
-        feedback.textContent = 'RSS-поток добавлен';
+    validateUrl(url, existingUrls)
+      .then((validatedUrl) => {
+        state.feeds.push(validatedUrl);
+        state.form.status = 'valid';
         form.reset();
         input.focus();
       })
       .catch((error) => {
-        feedback.className = 'feedback mt-3 mb-0 text-danger';
-        feedback.textContent = error.message;
+        state.form.status = 'invalid';
+        state.form.error = error.message;
       });
   });
 };

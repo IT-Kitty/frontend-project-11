@@ -12,6 +12,14 @@ body {
   max-width: 980px;
 }
 
+.rss-form .form-control {
+  font-size: 1rem;
+}
+
+.rss-form .form-control::placeholder {
+  font-size: 0.95rem;
+}
+
 .feedback.text-success-emphasis {
   color: #a7f3d0 !important;
 }
