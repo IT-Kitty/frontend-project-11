@@ -4,7 +4,7 @@ export default {
       title: 'RSS агрегатор',
       description: 'Начните читать RSS сегодня! Это легко, это красиво.',
       rssLabel: 'Ссылка RSS',
-      rssAriaLabel: 'RSS URL',
+      rssAriaLabel: 'url',
       rssPlaceholder: 'Ссылка RSS',
       rssExample: 'Пример: https://lorem-rss.hexlet.app/feed',
       submitButton: 'Добавить',
