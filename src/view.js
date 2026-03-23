@@ -42,7 +42,7 @@ const renderFeeds = (state, feedsNode, feedsContainer) => {
 
   feedsContainer.classList.remove('d-none')
   feedsNode.innerHTML = state.feeds
-    .map((feed) => `
+    .map(feed => `
       <li class="list-group-item border-0 px-0">
         <h3 class="h5 mb-1">${feed.title}</h3>
         <p class="mb-0 text-muted">${feed.description}</p>
@@ -60,7 +60,7 @@ const renderPosts = (state, postsNode, postsContainer, i18n) => {
 
   postsContainer.classList.remove('d-none')
   postsNode.innerHTML = state.posts
-    .map(post => {
+    .map((post) => {
       const isRead = state.ui.readPostIds.includes(post.id)
       const linkClass = isRead ? 'fw-normal link-secondary' : 'fw-bold'
 
