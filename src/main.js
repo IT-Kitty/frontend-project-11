@@ -6,6 +6,8 @@ import initI18n from './i18n.js';
 import fetchRss from './api.js';
 import parseRss from './parser.js';
 
+const FEEDS_UPDATE_INTERVAL = 5000;
+
 let idCounter = 1;
 const getNextId = () => idCounter++;
 
@@ -84,6 +86,16 @@ const state = proxy({
 
 const loadRssData = (url) => fetchRss(url).then((xml) => parseRss(xml));
 
+const createPost = (feedId, postData) => ({
+  id: getNextId(),
+  feedId,
+  title: postData.title,
+  description: postData.description,
+  link: postData.link,
+});
+
+const normalizePosts = (feedId, postsData) => postsData.map((postData) => createPost(feedId, postData));
+
 const addFeedToState = (stateData, url, parsedFeed) => {
   const feedId = getNextId();
   const feed = {
@@ -93,16 +105,42 @@ const addFeedToState = (stateData, url, parsedFeed) => {
     description: parsedFeed.feed.description,
   };
 
-  const posts = parsedFeed.posts.map((post) => ({
-    id: getNextId(),
-    feedId,
-    title: post.title,
-    description: post.description,
-    link: post.link,
-  }));
+  const posts = normalizePosts(feedId, parsedFeed.posts);
 
   stateData.feeds.unshift(feed);
   stateData.posts.unshift(...posts);
+};
+
+const addOnlyNewPosts = (stateData, feedId, parsedFeed) => {
+  const existingLinks = new Set(
+    stateData.posts
+      .filter((post) => post.feedId === feedId)
+      .map((post) => post.link),
+  );
+
+  const newPosts = normalizePosts(feedId, parsedFeed.posts)
+    .filter((post) => !existingLinks.has(post.link));
+
+  if (newPosts.length > 0) {
+    stateData.posts.unshift(...newPosts);
+  }
+};
+
+const refreshAllFeeds = (stateData) => {
+  const tasks = stateData.feeds.map((feed) => loadRssData(feed.url)
+    .then((parsedFeed) => addOnlyNewPosts(stateData, feed.id, parsedFeed))
+    .catch(() => null));
+
+  return Promise.allSettled(tasks).then(() => undefined);
+};
+
+const scheduleFeedsUpdate = (stateData) => {
+  setTimeout(() => {
+    refreshAllFeeds(stateData)
+      .finally(() => {
+        scheduleFeedsUpdate(stateData);
+      });
+  }, FEEDS_UPDATE_INTERVAL);
 };
 
 const setupForm = (i18n) => {
@@ -157,4 +195,5 @@ const setupForm = (i18n) => {
 initI18n().then((i18n) => {
   render(i18n);
   setupForm(i18n);
+  scheduleFeedsUpdate(state);
 });
