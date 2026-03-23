@@ -1,6 +1,6 @@
 const getTextContent = (element, selector) => element.querySelector(selector)?.textContent?.trim() ?? ''
 
-const parseRss = (xml) => {
+const parseRss = xml => {
   const parser = new DOMParser()
   const document = parser.parseFromString(xml, 'application/xml')
 
@@ -17,12 +17,12 @@ const parseRss = (xml) => {
   }
 
   const posts = Array.from(document.querySelectorAll('item'))
-    .map((item) => ({
+    .map(item => ({
       title: getTextContent(item, 'title'),
       description: getTextContent(item, 'description'),
       link: getTextContent(item, 'link'),
     }))
-    .filter((post) => post.title && post.link)
+    .filter(post => post.title && post.link)
 
   return {
     feed: {

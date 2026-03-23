@@ -23,13 +23,13 @@ const createState = () => proxy({
   },
 })
 
-const getNextId = (stateData) => {
+const getNextId = stateData => {
   const id = stateData.nextId
   stateData.nextId += 1
   return id
 }
 
-const render = (i18n) => {
+const render = i18n => {
   const app = document.querySelector('#app')
   const t = i18n.t.bind(i18n)
 
@@ -114,7 +114,7 @@ const render = (i18n) => {
   `
 }
 
-const loadRssData = (url) => fetchRss(url).then((xml) => parseRss(xml))
+const loadRssData = url => fetchRss(url).then(xml => parseRss(xml))
 
 const createPost = (stateData, feedId, postData) => ({
   id: getNextId(stateData),
@@ -125,7 +125,7 @@ const createPost = (stateData, feedId, postData) => ({
 })
 
 const normalizePosts = (stateData, feedId, postsData) => postsData
-  .map((postData) => createPost(stateData, feedId, postData))
+  .map(postData => createPost(stateData, feedId, postData))
 
 const addFeedToState = (stateData, url, parsedFeed) => {
   const feedId = getNextId(stateData)
@@ -145,27 +145,27 @@ const addFeedToState = (stateData, url, parsedFeed) => {
 const addOnlyNewPosts = (stateData, feedId, parsedFeed) => {
   const existingLinks = new Set(
     stateData.posts
-      .filter((post) => post.feedId === feedId)
-      .map((post) => post.link),
+      .filter(post => post.feedId === feedId)
+      .map(post => post.link),
   )
 
   const newPosts = normalizePosts(stateData, feedId, parsedFeed.posts)
-    .filter((post) => !existingLinks.has(post.link))
+    .filter(post => !existingLinks.has(post.link))
 
   if (newPosts.length > 0) {
     stateData.posts.unshift(...newPosts)
   }
 }
 
-const refreshAllFeeds = (stateData) => {
-  const tasks = stateData.feeds.map((feed) => loadRssData(feed.url)
-    .then((parsedFeed) => addOnlyNewPosts(stateData, feed.id, parsedFeed))
+const refreshAllFeeds = stateData => {
+  const tasks = stateData.feeds.map(feed => loadRssData(feed.url)
+    .then(parsedFeed => addOnlyNewPosts(stateData, feed.id, parsedFeed))
     .catch(() => null))
 
   return Promise.allSettled(tasks).then(() => undefined)
 }
 
-const scheduleFeedsUpdate = (stateData) => {
+const scheduleFeedsUpdate = stateData => {
   setTimeout(() => {
     refreshAllFeeds(stateData)
       .finally(() => {
@@ -209,7 +209,7 @@ const setupForm = (state, i18n) => {
     modalReadFullLink,
   })
 
-  posts.addEventListener('click', (event) => {
+  posts.addEventListener('click', event => {
     const postLink = event.target.closest('[data-post-id]')
     const previewButton = event.target.closest('[data-preview-id]')
 
@@ -227,18 +227,18 @@ const setupForm = (state, i18n) => {
     }
   })
 
-  form.addEventListener('submit', (event) => {
+  form.addEventListener('submit', event => {
     event.preventDefault()
 
     const formData = new FormData(form)
     const url = formData.get('url')?.toString().trim() ?? ''
-    const existingUrls = state.feeds.map((feed) => feed.url)
+    const existingUrls = state.feeds.map(feed => feed.url)
 
     state.form.status = 'sending'
     state.form.error = null
 
     validateUrl(url, existingUrls)
-      .then((validatedUrl) => loadRssData(validatedUrl).then((parsedData) => ({
+      .then(validatedUrl => loadRssData(validatedUrl).then(parsedData => ({
         validatedUrl,
         parsedData,
       })))
@@ -248,14 +248,14 @@ const setupForm = (state, i18n) => {
         form.reset()
         input.focus()
       })
-      .catch((error) => {
+      .catch(error => {
         state.form.status = 'invalid'
         state.form.error = error.message ?? 'errors.network'
       })
   })
 }
 
-initI18n().then((i18n) => {
+initI18n().then(i18n => {
   const state = createState()
   render(i18n)
   setupForm(state, i18n)

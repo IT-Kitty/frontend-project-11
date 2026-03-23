@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const buildProxyUrl = (url) => {
+const buildProxyUrl = url => {
   const proxyUrl = new URL('https://allorigins.hexlet.app/get')
   proxyUrl.searchParams.set('disableCache', 'true')
   proxyUrl.searchParams.set('url', url)
@@ -8,9 +8,9 @@ const buildProxyUrl = (url) => {
   return proxyUrl.toString()
 }
 
-const fetchRss = (url) => axios
+const fetchRss = url => axios
   .get(buildProxyUrl(url))
-  .then((response) => response.data.contents)
+  .then(response => response.data.contents)
   .catch(() => {
     throw new Error('errors.network')
   })
