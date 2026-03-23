@@ -9,8 +9,25 @@ import parseRss from './parser.js';
 
 const FEEDS_UPDATE_INTERVAL = 5000;
 
-let idCounter = 1;
-const getNextId = () => idCounter++;
+const createState = () => proxy({
+  nextId: 1,
+  feeds: [],
+  posts: [],
+  form: {
+    status: 'idle',
+    error: null,
+  },
+  ui: {
+    readPostIds: [],
+    modalPostId: null,
+  },
+});
+
+const getNextId = (stateData) => {
+  const id = stateData.nextId;
+  stateData.nextId += 1;
+  return id;
+};
 
 const render = (i18n) => {
   const app = document.querySelector('#app');
@@ -97,33 +114,21 @@ const render = (i18n) => {
   `;
 };
 
-const state = proxy({
-  feeds: [],
-  posts: [],
-  form: {
-    status: 'idle',
-    error: null,
-  },
-  ui: {
-    readPostIds: [],
-    modalPostId: null,
-  },
-});
-
 const loadRssData = (url) => fetchRss(url).then((xml) => parseRss(xml));
 
-const createPost = (feedId, postData) => ({
-  id: getNextId(),
+const createPost = (stateData, feedId, postData) => ({
+  id: getNextId(stateData),
   feedId,
   title: postData.title,
   description: postData.description,
   link: postData.link,
 });
 
-const normalizePosts = (feedId, postsData) => postsData.map((postData) => createPost(feedId, postData));
+const normalizePosts = (stateData, feedId, postsData) => postsData
+  .map((postData) => createPost(stateData, feedId, postData));
 
 const addFeedToState = (stateData, url, parsedFeed) => {
-  const feedId = getNextId();
+  const feedId = getNextId(stateData);
   const feed = {
     id: feedId,
     url,
@@ -131,7 +136,7 @@ const addFeedToState = (stateData, url, parsedFeed) => {
     description: parsedFeed.feed.description,
   };
 
-  const posts = normalizePosts(feedId, parsedFeed.posts);
+  const posts = normalizePosts(stateData, feedId, parsedFeed.posts);
 
   stateData.feeds.unshift(feed);
   stateData.posts.unshift(...posts);
@@ -144,7 +149,7 @@ const addOnlyNewPosts = (stateData, feedId, parsedFeed) => {
       .map((post) => post.link),
   );
 
-  const newPosts = normalizePosts(feedId, parsedFeed.posts)
+  const newPosts = normalizePosts(stateData, feedId, parsedFeed.posts)
     .filter((post) => !existingLinks.has(post.link));
 
   if (newPosts.length > 0) {
@@ -175,7 +180,7 @@ const markPostAsRead = (stateData, postId) => {
   }
 };
 
-const setupForm = (i18n) => {
+const setupForm = (state, i18n) => {
   const form = document.querySelector('[data-rss-form]');
   const input = form.querySelector('input[name="url"]');
   const feedback = document.querySelector('[data-feedback]');
@@ -251,7 +256,8 @@ const setupForm = (i18n) => {
 };
 
 initI18n().then((i18n) => {
+  const state = createState();
   render(i18n);
-  setupForm(i18n);
+  setupForm(state, i18n);
   scheduleFeedsUpdate(state);
 });
