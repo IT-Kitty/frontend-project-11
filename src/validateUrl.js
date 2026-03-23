@@ -1,6 +1,6 @@
-import * as yup from 'yup';
+import * as yup from 'yup'
 
-const createSchema = (existingUrls) => yup
+const createSchema = existingUrls => yup
   .string()
   .trim()
   .required()
@@ -8,9 +8,9 @@ const createSchema = (existingUrls) => yup
   .test(
     'not-duplicate',
     'errors.duplicate',
-    (value) => Promise.resolve(!existingUrls.includes(value)),
-  );
+    value => Promise.resolve(!existingUrls.includes(value)),
+  )
 
-const validateUrl = (url, existingUrls) => createSchema(existingUrls).validate(url);
+const validateUrl = (url, existingUrls) => createSchema(existingUrls).validate(url)
 
-export default validateUrl;
+export default validateUrl

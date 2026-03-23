@@ -25,4 +25,4 @@ export default {
       invalidRss: 'Ресурс не содержит валидный RSS',
     },
   },
-};
+}

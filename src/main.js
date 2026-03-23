@@ -1,13 +1,13 @@
-import './style.css';
-import Modal from 'bootstrap/js/dist/modal';
-import { proxy } from 'valtio/vanilla';
-import initView from './view.js';
-import validateUrl from './validateUrl.js';
-import initI18n from './i18n.js';
-import fetchRss from './api.js';
-import parseRss from './parser.js';
+import './style.css'
+import Modal from 'bootstrap/js/dist/modal'
+import { proxy } from 'valtio/vanilla'
+import initView from './view.js'
+import validateUrl from './validateUrl.js'
+import initI18n from './i18n.js'
+import fetchRss from './api.js'
+import parseRss from './parser.js'
 
-const FEEDS_UPDATE_INTERVAL = 5000;
+const FEEDS_UPDATE_INTERVAL = 5000
 
 const createState = () => proxy({
   nextId: 1,
@@ -21,17 +21,17 @@ const createState = () => proxy({
     readPostIds: [],
     modalPostId: null,
   },
-});
+})
 
-const getNextId = (stateData) => {
-  const id = stateData.nextId;
-  stateData.nextId += 1;
-  return id;
-};
+const getNextId = stateData => {
+  const id = stateData.nextId
+  stateData.nextId += 1
+  return id
+}
 
-const render = (i18n) => {
-  const app = document.querySelector('#app');
-  const t = i18n.t.bind(i18n);
+const render = i18n => {
+  const app = document.querySelector('#app')
+  const t = i18n.t.bind(i18n)
 
   app.innerHTML = `
     <div class="d-flex flex-column min-vh-100 bg-light">
@@ -111,10 +111,10 @@ const render = (i18n) => {
         </div>
       </div>
     </div>
-  `;
-};
+  `
+}
 
-const loadRssData = (url) => fetchRss(url).then((xml) => parseRss(xml));
+const loadRssData = url => fetchRss(url).then(xml => parseRss(xml))
 
 const createPost = (stateData, feedId, postData) => ({
   id: getNextId(stateData),
@@ -122,78 +122,78 @@ const createPost = (stateData, feedId, postData) => ({
   title: postData.title,
   description: postData.description,
   link: postData.link,
-});
+})
 
 const normalizePosts = (stateData, feedId, postsData) => postsData
-  .map((postData) => createPost(stateData, feedId, postData));
+  .map(postData => createPost(stateData, feedId, postData))
 
 const addFeedToState = (stateData, url, parsedFeed) => {
-  const feedId = getNextId(stateData);
+  const feedId = getNextId(stateData)
   const feed = {
     id: feedId,
     url,
     title: parsedFeed.feed.title,
     description: parsedFeed.feed.description,
-  };
+  }
 
-  const posts = normalizePosts(stateData, feedId, parsedFeed.posts);
+  const posts = normalizePosts(stateData, feedId, parsedFeed.posts)
 
-  stateData.feeds.unshift(feed);
-  stateData.posts.unshift(...posts);
-};
+  stateData.feeds.unshift(feed)
+  stateData.posts.unshift(...posts)
+}
 
 const addOnlyNewPosts = (stateData, feedId, parsedFeed) => {
   const existingLinks = new Set(
     stateData.posts
-      .filter((post) => post.feedId === feedId)
-      .map((post) => post.link),
-  );
+      .filter(post => post.feedId === feedId)
+      .map(post => post.link),
+  )
 
   const newPosts = normalizePosts(stateData, feedId, parsedFeed.posts)
-    .filter((post) => !existingLinks.has(post.link));
+    .filter(post => !existingLinks.has(post.link))
 
   if (newPosts.length > 0) {
-    stateData.posts.unshift(...newPosts);
+    stateData.posts.unshift(...newPosts)
   }
-};
+}
 
-const refreshAllFeeds = (stateData) => {
-  const tasks = stateData.feeds.map((feed) => loadRssData(feed.url)
-    .then((parsedFeed) => addOnlyNewPosts(stateData, feed.id, parsedFeed))
-    .catch(() => null));
+const refreshAllFeeds = stateData => {
+  const tasks = stateData.feeds.map(feed => loadRssData(feed.url)
+    .then(parsedFeed => addOnlyNewPosts(stateData, feed.id, parsedFeed))
+    .catch(() => null))
 
-  return Promise.allSettled(tasks).then(() => undefined);
-};
+  return Promise.allSettled(tasks).then(() => undefined)
+}
 
-const scheduleFeedsUpdate = (stateData) => {
+const scheduleFeedsUpdate = stateData => {
   setTimeout(() => {
     refreshAllFeeds(stateData)
       .finally(() => {
-        scheduleFeedsUpdate(stateData);
-      });
-  }, FEEDS_UPDATE_INTERVAL);
-};
+        scheduleFeedsUpdate(stateData)
+      })
+  }, FEEDS_UPDATE_INTERVAL)
+}
 
 const markPostAsRead = (stateData, postId) => {
   if (!stateData.ui.readPostIds.includes(postId)) {
-    stateData.ui.readPostIds.push(postId);
+    stateData.ui.readPostIds.push(postId)
   }
-};
+}
 
 const setupForm = (state, i18n) => {
-  const form = document.querySelector('[data-rss-form]');
-  const input = form.querySelector('input[name="url"]');
-  const feedback = document.querySelector('[data-feedback]');
-  const submitButton = form.querySelector('button[type="submit"]');
-  const posts = document.querySelector('[data-posts]');
-  const feeds = document.querySelector('[data-feeds]');
-  const postsContainer = document.querySelector('[data-posts-container]');
-  const feedsContainer = document.querySelector('[data-feeds-container]');
-  const modalElement = document.querySelector('#modal');
-  const modalTitle = document.querySelector('[data-modal-title]');
-  const modalDescription = document.querySelector('[data-modal-description]');
-  const modalReadFullLink = document.querySelector('[data-modal-read-full]');
-  const postPreviewModal = new Modal(modalElement);
+  const form = document.querySelector('[data-rss-form]')
+  const input = form.querySelector('input[name="url"]')
+  const feedback = document.querySelector('[data-feedback]')
+  const submitButton = form.querySelector('button[type="submit"]')
+  const posts = document.querySelector('[data-posts]')
+  const feeds = document.querySelector('[data-feeds]')
+  const postsContainer = document.querySelector('[data-posts-container]')
+  const feedsContainer = document.querySelector('[data-feeds-container]')
+  const modalElement = document.querySelector('#modal')
+  const modalTitle = document.querySelector('[data-modal-title]')
+  const modalDescription = document.querySelector('[data-modal-description]')
+  const modalReadFullLink = document.querySelector('[data-modal-read-full]')
+  const postPreviewModal = new Modal(modalElement)
 
   initView(state, {
     i18n,
@@ -207,57 +207,57 @@ const setupForm = (state, i18n) => {
     modalTitle,
     modalDescription,
     modalReadFullLink,
-  });
+  })
 
-  posts.addEventListener('click', (event) => {
-    const postLink = event.target.closest('[data-post-id]');
-    const previewButton = event.target.closest('[data-preview-id]');
+  posts.addEventListener('click', event => {
+    const postLink = event.target.closest('[data-post-id]')
+    const previewButton = event.target.closest('[data-preview-id]')
 
     if (postLink) {
-      const postId = Number(postLink.dataset.postId);
-      markPostAsRead(state, postId);
-      return;
+      const postId = Number(postLink.dataset.postId)
+      markPostAsRead(state, postId)
+      return
     }
 
     if (previewButton) {
-      const postId = Number(previewButton.dataset.previewId);
-      state.ui.modalPostId = postId;
-      markPostAsRead(state, postId);
-      postPreviewModal.show();
+      const postId = Number(previewButton.dataset.previewId)
+      state.ui.modalPostId = postId
+      markPostAsRead(state, postId)
+      postPreviewModal.show()
     }
-  });
+  })
 
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
+  form.addEventListener('submit', event => {
+    event.preventDefault()
 
-    const formData = new FormData(form);
-    const url = formData.get('url')?.toString().trim() ?? '';
-    const existingUrls = state.feeds.map((feed) => feed.url);
+    const formData = new FormData(form)
+    const url = formData.get('url')?.toString().trim() ?? ''
+    const existingUrls = state.feeds.map(feed => feed.url)
 
-    state.form.status = 'sending';
-    state.form.error = null;
+    state.form.status = 'sending'
+    state.form.error = null
 
     validateUrl(url, existingUrls)
-      .then((validatedUrl) => loadRssData(validatedUrl).then((parsedData) => ({
+      .then(validatedUrl => loadRssData(validatedUrl).then(parsedData => ({
         validatedUrl,
         parsedData,
       })))
       .then(({ validatedUrl, parsedData }) => {
-        addFeedToState(state, validatedUrl, parsedData);
-        state.form.status = 'valid';
-        form.reset();
-        input.focus();
+        addFeedToState(state, validatedUrl, parsedData)
+        state.form.status = 'valid'
+        form.reset()
+        input.focus()
       })
-      .catch((error) => {
-        state.form.status = 'invalid';
-        state.form.error = error.message ?? 'errors.network';
-      });
-  });
-};
+      .catch(error => {
+        state.form.status = 'invalid'
+        state.form.error = error.message ?? 'errors.network'
+      })
+  })
+}
 
-initI18n().then((i18n) => {
-  const state = createState();
-  render(i18n);
-  setupForm(state, i18n);
-  scheduleFeedsUpdate(state);
-});
+initI18n().then(i18n => {
+  const state = createState()
+  render(i18n)
+  setupForm(state, i18n)
+  scheduleFeedsUpdate(state)
+})
