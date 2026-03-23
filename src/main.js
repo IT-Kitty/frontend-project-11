@@ -1,4 +1,5 @@
 import './style.css';
+import Modal from 'bootstrap/js/dist/modal';
 import { proxy } from 'valtio/vanilla';
 import initView from './view.js';
 import validateUrl from './validateUrl.js';
@@ -72,6 +73,27 @@ const render = (i18n) => {
         </div>
       </main>
     </div>
+    <div class="modal fade" id="postPreviewModal" tabindex="-1" aria-labelledby="postPreviewModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title fs-5" id="postPreviewModalLabel" data-modal-title></h3>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="${t('ui.modalClose')}"></button>
+          </div>
+          <div class="modal-body" data-modal-description></div>
+          <div class="modal-footer">
+            <a
+              class="btn btn-primary"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-modal-read-full
+            >${t('ui.modalReadFull')}</a>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${t('ui.modalClose')}</button>
+          </div>
+        </div>
+      </div>
+    </div>
   `;
 };
 
@@ -81,6 +103,10 @@ const state = proxy({
   form: {
     status: 'idle',
     error: null,
+  },
+  ui: {
+    readPostIds: [],
+    modalPostId: null,
   },
 });
 
@@ -143,6 +169,12 @@ const scheduleFeedsUpdate = (stateData) => {
   }, FEEDS_UPDATE_INTERVAL);
 };
 
+const markPostAsRead = (stateData, postId) => {
+  if (!stateData.ui.readPostIds.includes(postId)) {
+    stateData.ui.readPostIds.push(postId);
+  }
+};
+
 const setupForm = (i18n) => {
   const form = document.querySelector('[data-rss-form]');
   const input = form.querySelector('input[name="url"]');
@@ -152,6 +184,11 @@ const setupForm = (i18n) => {
   const feeds = document.querySelector('[data-feeds]');
   const postsContainer = document.querySelector('[data-posts-container]');
   const feedsContainer = document.querySelector('[data-feeds-container]');
+  const modalElement = document.querySelector('#postPreviewModal');
+  const modalTitle = document.querySelector('[data-modal-title]');
+  const modalDescription = document.querySelector('[data-modal-description]');
+  const modalReadFullLink = document.querySelector('[data-modal-read-full]');
+  const postPreviewModal = new Modal(modalElement);
 
   initView(state, {
     i18n,
@@ -162,6 +199,27 @@ const setupForm = (i18n) => {
     feeds,
     postsContainer,
     feedsContainer,
+    modalTitle,
+    modalDescription,
+    modalReadFullLink,
+  });
+
+  posts.addEventListener('click', (event) => {
+    const postLink = event.target.closest('[data-post-id]');
+    const previewButton = event.target.closest('[data-preview-id]');
+
+    if (postLink) {
+      const postId = Number(postLink.dataset.postId);
+      markPostAsRead(state, postId);
+      return;
+    }
+
+    if (previewButton) {
+      const postId = Number(previewButton.dataset.previewId);
+      state.ui.modalPostId = postId;
+      markPostAsRead(state, postId);
+      postPreviewModal.show();
+    }
   });
 
   form.addEventListener('submit', (event) => {

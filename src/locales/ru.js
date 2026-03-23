@@ -10,6 +10,9 @@ export default {
       submitButton: 'Добавить',
       feedsHeader: 'Фиды',
       postsHeader: 'Посты',
+      previewButton: 'Просмотр',
+      modalClose: 'Закрыть',
+      modalReadFull: 'Читать полностью',
     },
     feedback: {
       success: 'RSS успешно загружен',

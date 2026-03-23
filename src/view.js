@@ -51,7 +51,7 @@ const renderFeeds = (state, feedsNode, feedsContainer) => {
     .join('');
 };
 
-const renderPosts = (state, postsNode, postsContainer) => {
+const renderPosts = (state, postsNode, postsContainer, i18n) => {
   if (state.posts.length === 0) {
     postsContainer.classList.add('d-none');
     postsNode.innerHTML = '';
@@ -61,11 +61,37 @@ const renderPosts = (state, postsNode, postsContainer) => {
   postsContainer.classList.remove('d-none');
   postsNode.innerHTML = state.posts
     .map((post) => `
-      <li class="list-group-item border-0 px-0">
-        <a href="${post.link}" target="_blank" rel="noopener noreferrer">${post.title}</a>
+      <li class="list-group-item border-0 px-0 d-flex justify-content-between align-items-start gap-3">
+        <a
+          href="${post.link}"
+          target="_blank"
+          rel="noopener noreferrer"
+          data-post-id="${post.id}"
+          class="${state.ui.readPostIds.includes(post.id) ? 'fw-normal' : 'fw-bold'}"
+        >${post.title}</a>
+        <button
+          type="button"
+          class="btn btn-outline-primary btn-sm"
+          data-preview-id="${post.id}"
+        >${i18n.t('ui.previewButton')}</button>
       </li>
     `)
     .join('');
+};
+
+const renderModal = (state, elements) => {
+  const currentPost = state.posts.find((post) => post.id === state.ui.modalPostId);
+
+  if (!currentPost) {
+    elements.modalTitle.textContent = '';
+    elements.modalDescription.textContent = '';
+    elements.modalReadFullLink.href = '#';
+    return;
+  }
+
+  elements.modalTitle.textContent = currentPost.title;
+  elements.modalDescription.textContent = currentPost.description;
+  elements.modalReadFullLink.href = currentPost.link;
 };
 
 const render = (state, elements) => {
@@ -73,7 +99,8 @@ const render = (state, elements) => {
   renderFeedback(state, elements.feedback, elements.i18n);
   renderSubmitButton(state, elements.submitButton);
   renderFeeds(state, elements.feeds, elements.feedsContainer);
-  renderPosts(state, elements.posts, elements.postsContainer);
+  renderPosts(state, elements.posts, elements.postsContainer, elements.i18n);
+  renderModal(state, elements);
 };
 
 const initView = (state, elements) => {
