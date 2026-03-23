@@ -60,14 +60,18 @@ const renderPosts = (state, postsNode, postsContainer, i18n) => {
 
   postsContainer.classList.remove('d-none');
   postsNode.innerHTML = state.posts
-    .map((post) => `
+    .map((post) => {
+      const isRead = state.ui.readPostIds.includes(post.id);
+      const linkClass = isRead ? 'fw-normal link-secondary' : 'fw-bold';
+
+      return `
       <li class="list-group-item border-0 px-0 d-flex justify-content-between align-items-start gap-3">
         <a
           href="${post.link}"
           target="_blank"
           rel="noopener noreferrer"
           data-post-id="${post.id}"
-          class="${state.ui.readPostIds.includes(post.id) ? 'fw-normal' : 'fw-bold'}"
+          class="${linkClass}"
         >${post.title}</a>
         <button
           type="button"
@@ -75,7 +79,8 @@ const renderPosts = (state, postsNode, postsContainer, i18n) => {
           data-preview-id="${post.id}"
         >${i18n.t('ui.previewButton')}</button>
       </li>
-    `)
+    `;
+    })
     .join('');
 };
 
