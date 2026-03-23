@@ -90,11 +90,11 @@ const render = (i18n) => {
         </div>
       </main>
     </div>
-    <div class="modal fade" id="postPreviewModal" tabindex="-1" aria-labelledby="postPreviewModalLabel" aria-hidden="true">
+    <div class="modal fade" id="modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h3 class="modal-title fs-5" id="postPreviewModalLabel" data-modal-title></h3>
+            <h3 class="modal-title fs-5" id="modalLabel" data-modal-title></h3>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="${t('ui.modalClose')}"></button>
           </div>
           <div class="modal-body" data-modal-description></div>
@@ -189,7 +189,7 @@ const setupForm = (state, i18n) => {
   const feeds = document.querySelector('[data-feeds]');
   const postsContainer = document.querySelector('[data-posts-container]');
   const feedsContainer = document.querySelector('[data-feeds-container]');
-  const modalElement = document.querySelector('#postPreviewModal');
+  const modalElement = document.querySelector('#modal');
   const modalTitle = document.querySelector('[data-modal-title]');
   const modalDescription = document.querySelector('[data-modal-description]');
   const modalReadFullLink = document.querySelector('[data-modal-read-full]');
