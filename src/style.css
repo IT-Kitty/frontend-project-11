@@ -1,0 +1,23 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+body {
+  margin: 0;
+}
+
+.bg-dark {
+  background-color: #1f2633 !important;
+}
+
+.rss-form {
+  max-width: 980px;
+}
+
+.feedback.text-success-emphasis {
+  color: #a7f3d0 !important;
+}
+
+@media (max-width: 991.98px) {
+  .display-3 {
+    font-size: 2.5rem;
+  }
+}
